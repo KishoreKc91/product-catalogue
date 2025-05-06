@@ -10,7 +10,7 @@ from .serializer import ProductSerializer
 def product_list(request):
     if request.method=='GET':
         cityFilter=request.GET.get('city','')
-        rentFilter=request.GET.get('rent',)
+        rentFilter=request.GET.get('rent',0)
 
         pageCount=request.GET.get('pageCount',1)
         productsPerPage=request.GET.get('itemsPerPage',50)
@@ -21,7 +21,8 @@ def product_list(request):
         #Multiple-Ordering
         order_by_list=sortParams.split(',')
 
-        if not cityFilter and rentFilter:
+        products=None
+        if cityFilter=='' and rentFilter==0:
             products=Product.objects.all()
         else:
             #Implementing filtering and ordering functionality
