@@ -9,9 +9,34 @@ from .serializer import ProductSerializer
 @api_view(['GET','POST'])
 def product_list(request):
     if request.method=='GET':
-        products=Product.objects.all()
+        cityFilter=request.GET.get('city','')
+        rentFilter=request.GET.get('rent',)
+
+        pageCount=request.GET.get('pageCount',1)
+        productsPerPage=request.GET.get('itemsPerPage',50)
+
+        sortType=request.GET.get('sortType','asc')
+        sortParams=request.GET.get('sortObject','')
+
+        #Multiple-Ordering
+        order_by_list=sortParams.split(',')
+
+        if not cityFilter and rentFilter:
+            products=Product.objects.all()
+        else:
+            #Implementing filtering and ordering functionality
+            products.Product.objects.filter(city=cityFilter).order_by(order_by_list)
+            for product in products.Product.objects:
+                if product.rent>rentFilter:
+                    product.remove()
+
+        #pagination support for smooth loading
+        productToSkip=(pageCount-1)*productsPerPage
+        products=products[productToSkip:productToSkip+productsPerPage]
+
         serializer=ProductSerializer(products,many=True)
         return Response(serializer.data)
+    
     elif request.method=='POST':
         serializer=ProductSerializer(data=request.data)
         if serializer.is_valid():
